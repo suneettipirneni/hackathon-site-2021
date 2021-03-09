@@ -66,3 +66,57 @@ def create_sponsor():
     }
 
     return res, 201
+
+
+@sponsors_blueprint.route("/sponsors/<sponsorname>", methods=["GET"])
+def get_sponsor(sponsorname: str):
+    """
+    Creates a new Sponsor.
+    ---
+    tags:
+        - sponsor
+    summary: Get Sponsor info
+    parameters:
+        - in: path
+          name: sponsorname
+          schema:
+            type: string
+    responses:
+        200:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    sponsor_name:
+                        type: string
+                    events:
+                        type: array
+                        items:
+                            $ref: '#/components/schemas/Event'
+                    email:
+                        type: string
+                    subscription_tier:
+                        type: string
+                    logo:
+                        type: string
+        400:
+            description: Bad request.
+        404:
+            description: Sorry, this sponsor doesn't exist.
+        5XX:
+            description: Unexpected error.
+    """
+    sponsor = Sponsor.objects(sponsor_name=sponsorname).first()
+    if not sponsor:
+        raise NotFound("Sorry, this sponsor doesn't exist")
+
+    res = {
+        "sponsor_name": sponsor.sponsor_name,
+        "email": sponsor.email,
+        "subscription_tier": sponsor.subscription_tier,
+        "logo": sponsor.logo,
+        "events": sponsor.events
+    }
+
+    return res, 200
